@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+ 
 <html lang="de">
 <head>
   <meta charset="UTF-8">
@@ -9,6 +9,8 @@
     h2 { margin-top: 30px; }
     .section { border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; }
     button { margin-top: 5px; }
+    .item { margin: 5px 0; }
+    .item button { margin-left: 10px; }
   </style>
 </head>
 <body>
@@ -28,14 +30,14 @@
 
     <div class="section">
       <h2>Hausaufgaben</h2>
-      <button id="btnHausaufgaben" class="hidden" onclick="addItem('hausaufgaben')">Hinzufügen</button>
-      <ul id="hausaufgaben"></ul>
+      <button id="btnHausaufgaben" class="hidden" onclick="showHomeworkForm()">Neue Hausaufgabe</button>
+      <div id="hausaufgaben"></div>
     </div>
 
     <div class="section">
       <h2>Elternsprechtage</h2>
-      <button id="btnEltern" class="hidden" onclick="addItem('eltern')">Hinzufügen</button>
-      <ul id="eltern"></ul>
+      <button id="btnEltern" class="hidden" onclick="showParentForm()">Neuen Termin</button>
+      <div id="eltern"></div>
     </div>
 
     <div class="section">
@@ -73,29 +75,49 @@
     // Inhalte anzeigen je nach Rolle
     function showContent(role){
       document.getElementById("content").classList.remove("hidden");
-
-      // Buttons nur für Admin sichtbar machen
       if(role==="admin"){
         document.getElementById("btnHausaufgaben").classList.remove("hidden");
         document.getElementById("btnEltern").classList.remove("hidden");
         document.getElementById("btnPlaene").classList.remove("hidden");
       }
-
       loadData();
     }
 
-    // Daten hinzufügen (Text)
-    function addItem(type){
-      const text = prompt("Bitte neuen Eintrag hinzufügen:");
-      if(text){
-        let items = JSON.parse(localStorage.getItem(type)) || [];
-        items.push(text);
-        localStorage.setItem(type, JSON.stringify(items));
-        loadData();
-      }
+    // ---------- HAUSAUFGABEN ----------
+    function showHomeworkForm(){
+      const fach = prompt("Fach (z.B. Mathe, Deutsch, Englisch):");
+      if(!fach) return;
+      const typ = prompt("Buch oder Arbeitsheft?");
+      if(!typ) return;
+      const seite = prompt("Seite:");
+      if(!seite) return;
+      const nummer = prompt("Nummer/Aufgabe:");
+      if(!nummer) return;
+
+      const hw = {fach, typ, seite, nummer};
+      let list = JSON.parse(localStorage.getItem("hausaufgaben")) || [];
+      list.push(hw);
+      localStorage.setItem("hausaufgaben", JSON.stringify(list));
+      loadData();
     }
 
-    // Plan (Bild) hinzufügen
+    // ---------- ELTERNSPRECHTAGE ----------
+    function showParentForm(){
+      const datum = prompt("Datum (z.B. 12.10.2025):");
+      if(!datum) return;
+      const uhrzeit = prompt("Uhrzeit:");
+      if(!uhrzeit) return;
+      const info = prompt("Bemerkung:");
+      if(!info) return;
+
+      const termin = {datum, uhrzeit, info};
+      let list = JSON.parse(localStorage.getItem("eltern")) || [];
+      list.push(termin);
+      localStorage.setItem("eltern", JSON.stringify(list));
+      loadData();
+    }
+
+    // ---------- PLÄNE ----------
     function addPlan(){
       const url = prompt("Bild-URL eingeben:");
       if(url){
@@ -106,28 +128,52 @@
       }
     }
 
-    // Daten laden
+    // ---------- LÖSCHEN ----------
+    function deleteItem(type, index){
+      let list = JSON.parse(localStorage.getItem(type)) || [];
+      list.splice(index,1);
+      localStorage.setItem(type, JSON.stringify(list));
+      loadData();
+    }
+
+    // ---------- DATEN LADEN ----------
     function loadData(){
-      ["hausaufgaben","eltern"].forEach(type => {
-        const list = document.getElementById(type);
-        list.innerHTML="";
-        let items = JSON.parse(localStorage.getItem(type)) || [];
-        items.forEach(i => {
-          const li = document.createElement("li");
-          li.innerText = i;
-          list.appendChild(li);
-        });
+      const role = localStorage.getItem("role");
+
+      // Hausaufgaben
+      const hwDiv = document.getElementById("hausaufgaben");
+      hwDiv.innerHTML="";
+      let hausaufgaben = JSON.parse(localStorage.getItem("hausaufgaben")) || [];
+      hausaufgaben.forEach((hw,i)=>{
+        const div = document.createElement("div");
+        div.className="item";
+        div.innerHTML = `<b>${hw.fach}</b> - ${hw.typ}, Seite ${hw.seite}, Nr. ${hw.nummer}`;
+        if(role==="admin") div.innerHTML += ` <button onclick="deleteItem('hausaufgaben',${i})">Löschen</button>`;
+        hwDiv.appendChild(div);
       });
 
+      // Elternsprechtage
+      const elternDiv = document.getElementById("eltern");
+      elternDiv.innerHTML="";
+      let eltern = JSON.parse(localStorage.getItem("eltern")) || [];
+      eltern.forEach((t,i)=>{
+        const div = document.createElement("div");
+        div.className="item";
+        div.innerHTML = `${t.datum} - ${t.uhrzeit} (${t.info})`;
+        if(role==="admin") div.innerHTML += ` <button onclick="deleteItem('eltern',${i})">Löschen</button>`;
+        elternDiv.appendChild(div);
+      });
+
+      // Pläne
       const plaeneDiv = document.getElementById("plaene");
       plaeneDiv.innerHTML="";
       let plaene = JSON.parse(localStorage.getItem("plaene")) || [];
-      plaene.forEach(url => {
-        const img = document.createElement("img");
-        img.src = url;
-        img.width = 200;
-        img.style.margin="5px";
-        plaeneDiv.appendChild(img);
+      plaene.forEach((url,i)=>{
+        const div = document.createElement("div");
+        div.className="item";
+        div.innerHTML = `<img src="${url}" width="200">`;
+        if(role==="admin") div.innerHTML += ` <button onclick="deleteItem('plaene',${i})">Löschen</button>`;
+        plaeneDiv.appendChild(div);
       });
     }
 
@@ -143,4 +189,3 @@
 
 </body>
 </html>
-
