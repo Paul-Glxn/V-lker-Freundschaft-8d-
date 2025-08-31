@@ -108,6 +108,7 @@
     currentRole = ids[userid];
     document.getElementById("login").classList.add("hidden");
     document.getElementById("content").classList.remove("hidden");
+    // Forms nur für Admin sichtbar
     if(currentRole==="admin"){
       document.getElementById("hausaufgabenForm").classList.remove("hidden");
       document.getElementById("elternForm").classList.remove("hidden");
@@ -142,17 +143,55 @@
     // Hausaufgaben
     const hwList=JSON.parse(localStorage.getItem("hausaufgaben"))||[];
     const hwDiv=document.getElementById("hausaufgabenList"); hwDiv.innerHTML="";
-    hwList.forEach((h,i)=>{ const line=document.createElement("div"); line.className="item"; line.textContent=`${h.fach} – ${h.typ}, Seite ${h.seite}, Nr. ${h.nummer} (bis ${h.deadline})`; if(currentRole==="admin"){ const del=document.createElement("button"); del.className="btn-danger"; del.textContent="Löschen"; del.onclick=()=>deleteHomework(i); line.appendChild(del); } hwDiv.appendChild(line); });
+    hwList.forEach((h,i)=>{
+        const line=document.createElement("div");
+        line.className="item";
+        line.textContent=`${h.fach} – ${h.typ}, Seite ${h.seite}, Nr. ${h.nummer} (bis ${h.deadline})`;
+        if(currentRole==="admin"){
+            const del=document.createElement("button");
+            del.className="btn-danger";
+            del.textContent="Löschen";
+            del.onclick=()=>deleteHomework(i);
+            line.appendChild(del);
+        }
+        hwDiv.appendChild(line);
+    });
 
-    // Eltern
+    // Elternsprechtage
     const eltern=JSON.parse(localStorage.getItem("eltern"))||[];
     const elDiv=document.getElementById("elternList"); elDiv.innerHTML="";
-    eltern.forEach((e,i)=>{ const line=document.createElement("div"); line.className="item"; line.textContent=`${e.datum} um ${e.zeit} bei ${e.lehrer}`; if(currentRole==="admin"){ const del=document.createElement("button"); del.className="btn-danger"; del.textContent="Löschen"; del.onclick=()=>deleteParent(i); line.appendChild(del); } elDiv.appendChild(line); });
+    eltern.forEach((e,i)=>{
+        const line=document.createElement("div");
+        line.className="item";
+        line.textContent=`${e.datum} um ${e.zeit} bei ${e.lehrer}`;
+        if(currentRole==="admin"){
+            const del=document.createElement("button");
+            del.className="btn-danger";
+            del.textContent="Löschen";
+            del.onclick=()=>deleteParent(i);
+            line.appendChild(del);
+        }
+        elDiv.appendChild(line);
+    });
 
     // Pläne
     const plaene=JSON.parse(localStorage.getItem("plaene"))||[];
     const plDiv=document.getElementById("plaeneList"); plDiv.innerHTML="";
-    plaene.forEach((p,i)=>{ const line=document.createElement("div"); line.className="item"; const img=document.createElement("img"); img.src=p; line.appendChild(img); if(currentRole==="admin"){ const del=document.createElement("button"); del.className="btn-danger"; del.textContent="Löschen"; del.onclick=()=>deletePlan(i); line.appendChild(del); } plDiv.appendChild(line); });
+    plaene.forEach((p,i)=>{
+        const line=document.createElement("div");
+        line.className="item";
+        const img=document.createElement("img");
+        img.src=p;
+        line.appendChild(img);
+        if(currentRole==="admin"){
+            const del=document.createElement("button");
+            del.className="btn-danger";
+            del.textContent="Löschen";
+            del.onclick=()=>deletePlan(i);
+            line.appendChild(del);
+        }
+        plDiv.appendChild(line);
+    });
   }
 </script>
 
